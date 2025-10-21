@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Work Wise</title>
+  <meta name="theme-color" content="#1A1A1D">
+  <link rel="manifest" href="manifest.json" crossOrigin="use-credentials">
+  <link rel="apple-touch-icon" href="https://r2.flowith.net/files/png/KDR68-work_wise_dashboard_ui_mockup_index_0@1024x1024.png">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+    :root {
+      --background: #1A1A1D;
+      --surface: #2C2C31;
+      --accent-blue: #4A90E2;
+      --accent-green: #50E3C2;
+      --text-primary: #F2F2F2;
+      --text-secondary: #A9A9A9;
+      --alert-red: #E94C53;
+      --border-color: #444;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      font-size: 16px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      color: var(--text-primary);
+      background-color: var(--background);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .app-header, .app-footer {
+      flex-shrink: 0;
+      background-color: var(--surface);
+    }
+    
+    .tab-bar {
+      display: flex;
+      justify-content: space-around;
+      list-style: none;
+    }
+
+    .tab-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 400;
+      padding: 1rem 0.5rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      transition: color 0.2s ease, border-bottom-color 0.2s ease;
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab-link.active {
+      color: var(--text-primary);
+      font-weight: 700;
+      border-bottom-color: var(--accent-blue);
+    }
+
+    .tab-link:hover:not(.active) {
+      color: var(--text-primary);
+    }
+
+    .app-main {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+      padding-bottom: 6rem; /* Space for bottom nav */
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .card {
+      background-color: var(--surface);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    h1, h2 {
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    h1 { font-size: 1.75rem; }
+    h2 { font-size: 1.25rem; color: var(--text-secondary); }
+
+    /* Forms */
+    .input-group {
+      display: grid;
+      gap: 1rem;
+    }
+
+    input[type="text"], textarea, select {
+      width: 100%;
+      background-color: var(--background);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    input[type="text"]::placeholder, textarea::placeholder {
+      color: var(--text-secondary);
+    }
+
+    input[type="text"]:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.3);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .btn-primary {
+      background-color: var(--accent-blue);
+      color: var(--text-primary);
+    }
+
+    .btn-delete {
+      background-color: transparent;
+      color: var(--alert-red);
+      padding: 0.5rem;
+    }
+    .btn-delete:hover {
+        background-color: rgba(233, 76, 83, 0.1);
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .btn-complete {
+      background-color: transparent;
+      color: var(--text-secondary);
+       padding: 0.5rem;
+    }
+
+    .btn-complete:hover {
+        background-color: rgba(80, 227, 194, 0.1);
+        transform: none;
+        box-shadow: none;
+    }
+    
+    /* Lists */
+    .item-list {
+      list-style: none;
+      display: grid;
+      gap: 1rem;
+    }
+
+    .list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem;
+      background-color: var(--background);
+      border-radius: 8px;
+      transition: background-color 0.2s;
+    }
+
+    .list-item:hover {
+      background-color: #3a3a40;
+    }
+
+    .list-item.completed .item-name {
+      text-decoration: line-through;
+      color: var(--text-secondary);
+    }
+     .list-item.completed .btn-complete {
+      color: var(--accent-green);
+    }
+
+    .item-info {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    
+    .item-name {
+        font-size: 1rem;
+    }
+    
+    .item-topic, .item-time, .item-date {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        background-color: var(--surface);
+        padding: 2px 6px;
+        border-radius: 4px;
+        align-self: flex-start;
+    }
+
+    .item-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    /* Main Tab */
+    #home-content {
+        grid-template-columns: 1fr;
+    }
+
+    .info-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .info-top {
+        display: flex;
+        justify-content: space-between;
+        font-size: 1.2rem;
+        font-weight: 700;
+    }
+    .info-bottom {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    #current-progress {
+        width: 100%;
+        height: 10px;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+    #current-progress::-webkit-progress-bar {
+        background-color: var(--background);
+        border-radius: 5px;
+    }
+    #current-progress::-webkit-progress-value {
+        background-color: var(--accent-blue);
+        border-radius: 5px;
+    }
+
+    .chart-container {
+        display: grid;
+        gap: 1.5rem;
+        grid-template-columns: 1fr;
+    }
+    
+    /* Todo Tab */
+    #todo-lists {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: 1fr;
+    }
+
+    /* Responsiveness */
+    .app-header { display: none; }
+    .app-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .app-footer .tab-link i {
+      width: 24px;
+      height: 24px;
+    }
+    .app-footer .tab-link span {
+      display: block;
+    }
+    
+    @media (min-width: 768px) {
+      .app-header {
+        display: block;
+        border-bottom: 1px solid var(--border-color);
+      }
+      .tab-bar {
+        justify-content: flex-start;
+        padding: 0 1.5rem;
+      }
+      .tab-link {
+        padding: 1rem;
+        font-size: 1rem;
+        flex-direction: row;
+        gap: 8px;
+      }
+      .app-footer { display: none; }
+      .app-main { padding-bottom: 1.5rem; }
+
+      .tab-content {
+          grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      }
+      
+      .input-card {
+        grid-column: 1 / -1; /* Make input cards span full width */
+      }
+      
+      #home-content, #todo-lists {
+          grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      }
+
+      .chart-container {
+          grid-template-columns: 2fr 1fr;
+      }
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        color: var(--text-secondary);
+        padding: 2rem;
+        background-color: var(--background);
+        border-radius: 8px;
+        border: 2px dashed var(--border-color);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="app-header">
+    <nav class="tab-bar" id="desktop-nav"></nav>
+  </header>
+
+  <main class="app-main">
+
+    <!-- Home Tab -->
+    <div id="home-content" class="tab-content active">
+        <div class="card">
+             <h1>Dashboard</h1>
+             <div class="info-container">
+                <div class="info-top">
+                    <label id="user-name">Neo</label>
+                    <label id="user-money">$10,000,000</label>
+                </div>
+                <div class="info-bottom">
+                    <label for="level">Lv 99:</label>
+                    <progress id="current-progress" value="75" max="100"></progress>
+                </div>
+            </div>
+        </div>
+        <div class="card chart-container">
+            <div class="bar-chart-wrapper"><canvas id="barChart"></canvas></div>
+            <div class="pie-chart-wrapper"><canvas id="pieChart"></canvas></div>
+        </div>
+    </div>
+
+    <!-- Todo Tab -->
+    <div id="todo-content" class="tab-content">
+        <div class="card input-card">
+            <h1>Daily Planner</h1>
+            <div class="input-group">
+                <input type="text" id="todo-name" placeholder="What's your plan?">
+                <select id="todo-time">
+                    <option value="morning">Morning (7am - 12pm)</option>
+                    <option value="afternoon">Afternoon (12pm - 6pm)</option>
+                    <option value="evening">Evening (6pm - 6am)</option>
+                </select>
+                <button id="add-todo" class="btn btn-primary"><i data-lucide="plus"></i> Add Todo</button>
+            </div>
+        </div>
+        <div id="todo-lists">
+            <div class="card">
+                <h2>Morning</h2>
+                <ul id="morning-todo-list" class="item-list"></ul>
+            </div>
+            <div class="card">
+                <h2>Afternoon</h2>
+                <ul id="afternoon-todo-list" class="item-list"></ul>
+            </div>
+            <div class="card">
+                <h2>Evening</h2>
+                <ul id="evening-todo-list" class="item-list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Tab -->
+    <div id="task-content" class="tab-content">
+        <div class="card input-card">
+            <h1>Task List</h1>
+            <div class="input-group">
+                <input type="text" id="task-name" placeholder="Enter a new task...">
+                <input type="text" id="task-topic" placeholder="Topic (e.g., Work, Study)">
+                <button id="add-task" class="btn btn-primary"><i data-lucide="plus"></i> Add Task</button>
+            </div>
+        </div>
+        <div class="card">
+            <h2>All Tasks</h2>
+            <ul id="task-list" class="item-list"></ul>
+        </div>
+    </div>
+    
+    <!-- Goal Tab -->
+    <div id="goal-content" class="tab-content">
+        <div class="card input-card">
+            <h1>Goals</h1>
+            <div class="input-group">
+                <input type="text" id="goal-name" placeholder="What's your long-term goal?">
+                <button id="add-goal" class="btn btn-primary"><i data-lucide="plus"></i> Add Goal</button>
+            </div>
+        </div>
+        <div class="card">
+            <h2>My Goals</h2>
+            <ul id="goal-list" class="item-list"></ul>
+        </div>
+    </div>
+    
+    <!-- Queue Tab -->
+    <div id="queue-content" class="tab-content">
+        <div class="card input-card">
+            <h1>Queue</h1>
+            <div class="input-group">
+                <input type="text" id="queue-name" placeholder="Add item to process queue...">
+                <button id="add-queue" class="btn btn-primary"><i data-lucide="plus"></i> Add to Queue</button>
+            </div>
+        </div>
+        <div class="card">
+            <h2>Next Up</h2>
+            <ul id="queue-list" class="item-list"></ul>
+        </div>
+    </div>
+
+    <!-- Note Tab -->
+    <div id="note-content" class="tab-content">
+        <div class="card input-card">
+            <h1>Notes</h1>
+            <div class="input-group">
+                <input type="text" id="note-name" placeholder="Jot down a quick note...">
+                <button id="add-note" class="btn btn-primary"><i data-lucide="plus"></i> Add Note</button>
+            </div>
+        </div>
+        <div class="card">
+            <h2>My Notes</h2>
+            <ul id="note-list" class="item-list"></ul>
+        </div>
+    </div>
+
+    <!-- Diary Tab -->
+    <div id="diary-content" class="tab-content">
+        <div class="card input-card">
+            <h1>Diary</h1>
+            <div class="input-group">
+                <input type="text" id="diary-name" placeholder="Entry Title">
+                <textarea id="diary-content" placeholder="What's on your mind?"></textarea>
+                <button id="add-diary" class="btn btn-primary"><i data-lucide="plus"></i> Add Entry</button>
+            </div>
+        </div>
+        <div class="card">
+            <h2>Journal</h2>
+            <ul id="diary-list" class="item-list"></ul>
+        </div>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <nav class="tab-bar" id="mobile-nav"></nav>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+      // --- SERVICE WORKER & MANIFEST ---
+      const registerServiceWorker = () => {
+        if ('serviceWorker' in navigator) {
+          const serviceWorkerCode = `
+            const CACHE_NAME = 'workwise-cache-v1';
+            const urlsToCache = ['./', './index.html'];
+            self.addEventListener('install', event => {
+              event.waitUntil(
+                caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+              );
+            });
+            self.addEventListener('fetch', event => {
+              event.respondWith(
+                caches.match(event.request).then(response => {
+                  return response || fetch(event.request);
+                })
+              );
+            });
+          `;
+          const swBlob = new Blob([serviceWorkerCode], { type: 'application/javascript' });
+          const swUrl = URL.createObjectURL(swBlob);
+
+          navigator.serviceWorker.register(swUrl)
+            .then(reg => console.log('Service Worker registered.', reg))
+            .catch(err => console.error('Service Worker registration failed:', err));
+        }
+      };
+
+      const createManifest = () => {
+        const manifest = {
+            "name": "Work Wise",
+            "short_name": "WorkWise",
+            "start_url": ".",
+            "display": "standalone",
+            "background_color": "#1A1A1D",
+            "theme_color": "#1A1A1D",
+            "description": "A modern productivity PWA.",
+            "icons": [{
+                "src": "https://r2.flowith.net/files/png/KDR68-work_wise_dashboard_ui_mockup_index_0@1024x1024.png",
+                "sizes": "192x192",
+                "type": "image/png"
+            }, {
+                "src": "https://r2.flowith.net/files/png/KDR68-work_wise_dashboard_ui_mockup_index_0@1024x1024.png",
+                "sizes": "512x512",
+                "type": "image/png"
+            }]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(manifestBlob);
+        document.querySelector('link[rel="manifest"]').setAttribute('href', manifestURL);
+      };
+
+      // --- NOTIFICATIONS ---
+      const showNotification = (title, body) => {
+        if (Notification.permission === 'granted') {
+          new Notification(title, { body, icon: 'https://r2.flowith.net/files/png/KDR68-work_wise_dashboard_ui_mockup_index_0@1024x1024.png' });
+        } else if (Notification.permission !== 'denied') {
+          Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+              new Notification(title, { body });
+            }
+          });
+        }
+      };
+      
+      // --- APP STATE & DOM ELEMENTS ---
+      const state = {
+        todos: [], tasks: [], goals: [], queue: [], notes: [], diary: [],
+        activeTab: 'home'
+      };
+
+      const tabsConfig = [
+        { id: 'home', icon: 'layout-dashboard', label: 'Main' },
+        { id: 'todo', icon: 'list-checks', label: 'Todo' },
+        { id: 'task', icon: 'check-square', label: 'Task' },
+        { id: 'goal', icon: 'target', label: 'Goal' },
+        { id: 'queue', icon: 'arrow-down-up', label: 'Queue' },
+        { id: 'note', icon: 'notebook-pen', label: 'Note' },
+        { id: 'diary', icon: 'book-open', label: 'Diary' },
+      ];
+
+      const dom = {
+        desktopNav: document.getElementById('desktop-nav'),
+        mobileNav: document.getElementById('mobile-nav'),
+        contentAreas: tabsConfig.map(t => document.getElementById(`${t.id}-content`)),
+        // Inputs
+        todo: { name: document.getElementById('todo-name'), time: document.getElementById('todo-time'), add: document.getElementById('add-todo') },
+        task: { name: document.getElementById('task-name'), topic: document.getElementById('task-topic'), add: document.getElementById('add-task') },
+        goal: { name: document.getElementById('goal-name'), add: document.getElementById('add-goal') },
+        queue: { name: document.getElementById('queue-name'), add: document.getElementById('add-queue') },
+        note: { name: document.getElementById('note-name'), add: document.getElementById('add-note') },
+        diary: { name: document.getElementById('diary-name'), content: document.getElementById('diary-content'), add: document.getElementById('add-diary') },
+        // Lists
+        todoLists: {
+            morning: document.getElementById('morning-todo-list'),
+            afternoon: document.getElementById('afternoon-todo-list'),
+            evening: document.getElementById('evening-todo-list')
+        },
+        taskList: document.getElementById('task-list'),
+        goalList: document.getElementById('goal-list'),
+        queueList: document.getElementById('queue-list'),
+        noteList: document.getElementById('note-list'),
+        diaryList: document.getElementById('diary-list'),
+      };
+
+      // --- DATA MANAGEMENT ---
+      const initialTaskData = `0,None,0,sadasd
+AI,0,example_task
+App,0,CS50 APP MOBILE
+App,0,example_task
+Chinese,0,HSK 1-3 UDEMY
+Chinese,0,Sách Từ Vựng Tiếng Trung
+Chinese,0,example_task
+Chinese,0,ÔN HSK 1
+DGNL,0,ANH->TOÁN->TIẾNG VIỆT->KHOA HỌC
+DGNL,0,example_task
+Game,0,Unity
+Game,0,example_task
+IELTS,0,Course IELTS to band 7
+IELTS,0,Sách 20 day
+IELTS,0,example_task
+MMO,0,Digital Marketing
+MMO,0,example_task
+Mua Đồ,0,Thuốc Vitamin B
+Mua Đồ,0,example_task
+Mua Đồ,0,Áo Khoác
+THPT,0,example_task
+Tin,0,DSA 28tech và DSA W3school
+Tin,0,HTML,CSS
+Tin,0,Hacksplanning
+Tin,0,Kali linux UDEMY
+Tin,0,Sách HDONTHI Tin
+Tin,0,USACO GUIDE
+Tin,0,W3school SQL, HTML, CSS, Algo
+Tin,0,W3school cyper security
+Tin,0,example_task
+Tin,0,Ôn Algo Tin python
+Tiếng Việt,0,MINDMAP TIẾNG VIỆT
+Tiếng Việt,0,Sách DGNL Tiếng Việt HCM
+Tiếng Việt,0,Sách Tiếng Việt EMPIRE
+Tiếng Việt,0,Sách Tiếng Việt HSA
+Tiếng Việt,0,example_task
+Toán,0,example_task
+WEB,0,Backend 28tech
+WEB,0,CS50 WEB
+WEB,0,Front end và React
+WEB,0,W3SCHOOL WEB
+WEB,0,WEB DLLT
+WEB,0,example_task`;
+
+      const loadData = () => {
+        tabsConfig.forEach(tab => {
+            if (tab.id === 'home') return;
+            const key = `workwise-${tab.id}s`;
+            const data = localStorage.getItem(key);
+            if (data) {
+                state[tab.id + 's'] = JSON.parse(data);
+            } else if (tab.id === 'task') {
+                // Special initial load for tasks
+                state.tasks = initialTaskData.split('\n').map(line => {
+                    const [topic, completed, name] = line.split(',');
+                    return { id: Date.now() + Math.random(), name, topic, completed: completed === '1' };
+                }).filter(t => t.name);
+                saveData('tasks');
+            }
+        });
+      };
+      
+      const saveData = (key) => {
+        localStorage.setItem(`workwise-${key}`, JSON.stringify(state[key]));
+      };
+
+      // --- RENDERING ---
+      const getEmptyStateHTML = (message) => `<li class="empty-state">${message}</li>`;
+
+      const renderTodos = () => {
+        dom.todoLists.morning.innerHTML = state.todos.filter(t => t.time === 'morning').map(todo => createItemHTML(todo, 'todo')).join('') || getEmptyStateHTML('No morning plans.');
+        dom.todoLists.afternoon.innerHTML = state.todos.filter(t => t.time === 'afternoon').map(todo => createItemHTML(todo, 'todo')).join('') || getEmptyStateHTML('No afternoon plans.');
+        dom.todoLists.evening.innerHTML = state.todos.filter(t => t.time === 'evening').map(todo => createItemHTML(todo, 'todo')).join('') || getEmptyStateHTML('No evening plans.');
+      };
+      
+      const renderTasks = () => {
+        dom.taskList.innerHTML = state.tasks.map(task => createItemHTML(task, 'task')).join('') || getEmptyStateHTML('No tasks found.');
+      };
+
+      const renderGoals = () => {
+        dom.goalList.innerHTML = state.goals.map(goal => createItemHTML(goal, 'goal')).join('') || getEmptyStateHTML('No goals defined.');
+      };
+      
+      const renderQueue = () => {
+        dom.queueList.innerHTML = state.queue.map(item => createItemHTML(item, 'queue')).join('') || getEmptyStateHTML('Queue is empty.');
+      };
+      
+      const renderNotes = () => {
+        dom.noteList.innerHTML = state.notes.map(note => createItemHTML(note, 'note')).join('') || getEmptyStateHTML('No notes saved.');
+      };
+      
+      const renderDiary = () => {
+        dom.diaryList.innerHTML = state.diary.map(entry => createItemHTML(entry, 'diary')).join('') || getEmptyStateHTML('No diary entries yet.');
+      };
+
+      const createItemHTML = (item, type) => {
+        const completedClass = item.completed ? 'completed' : '';
+        const name = item.name || item.content; // for notes
+        
+        let meta = '';
+        if (type === 'task' && item.topic) meta = `<span class="item-topic">${item.topic}</span>`;
+        if (type === 'todo' && item.time) meta = `<span class="item-time">${item.time}</span>`;
+        if (type === 'diary' && item.date) meta = `<span class="item-date">${item.date}</span>`;
+        
+        const completeButton = ['todo', 'task', 'goal'].includes(type) ?
+            `<button class="btn-complete" data-id="${item.id}" data-type="${type}"><i data-lucide="check-circle" class="lucide-icon"></i></button>` : '';
+
+        return `
+            <li class="list-item ${completedClass}" data-id="${item.id}">
+                <div class="item-info">
+                    ${meta}
+                    <span class="item-name">${name}</span>
+                </div>
+                <div class="item-actions">
+                    ${completeButton}
+                    <button class="btn-delete" data-id="${item.id}" data-type="${type}"><i data-lucide="trash-2" class="lucide-icon"></i></button>
+                </div>
+            </li>
+        `;
+      };
+      
+      const renderAll = () => {
+        renderTodos();
+        renderTasks();
+        renderGoals();
+        renderQueue();
+        renderNotes();
+        renderDiary();
+        updateCharts();
+        lucide.createIcons();
+      };
+
+      // --- EVENT HANDLERS ---
+      const handleAddItem = (type) => {
+        const stateKey = `${type}s`;
+        const inputs = dom[type];
+        const name = inputs.name.value.trim();
+        if (!name) return;
+
+        let newItem;
+        switch(type) {
+            case 'todo':
+                newItem = { id: Date.now(), name, time: inputs.time.value, completed: false };
+                break;
+            case 'task':
+                newItem = { id: Date.now(), name, topic: inputs.topic.value.trim() || 'General', completed: false };
+                break;
+            case 'diary':
+                newItem = { id: Date.now(), name, content: inputs.content.value.trim(), date: new Date().toLocaleDateString() };
+                break;
+            case 'note':
+                newItem = { id: Date.now(), content: name };
+                break;
+            default: // goal, queue
+                newItem = { id: Date.now(), name, completed: false };
+        }
+        
+        state[stateKey].push(newItem);
+        saveData(stateKey);
+        
+        // Clear inputs
+        inputs.name.value = '';
+        if (inputs.topic) inputs.topic.value = '';
+        if (inputs.content) inputs.content.value = '';
+
+        renderAll();
+        showNotification(`New ${type} added!`, name);
+      };
+
+      const handleListClick = (e) => {
+          const button = e.target.closest('button');
+          if (!button) return;
+
+          const { id, type } = button.dataset;
+          const stateKey = `${type}s`;
+
+          if (button.classList.contains('btn-delete')) {
+              state[stateKey] = state[stateKey].filter(item => item.id != id);
+          } else if (button.classList.contains('btn-complete')) {
+              const item = state[stateKey].find(item => item.id == id);
+              if (item) item.completed = !item.completed;
+          }
+          
+          saveData(stateKey);
+          renderAll();
+      };
+
+      // --- TABBING ---
+      const setupTabs = () => {
+        const createTab = (tab) => `
+          <a href="#" class="tab-link" data-tab="${tab.id}">
+            <i data-lucide="${tab.icon}"></i>
+            <span>${tab.label}</span>
+          </a>`;
+        
+        dom.desktopNav.innerHTML = tabsConfig.map(createTab).join('');
+        dom.mobileNav.innerHTML = tabsConfig.map(createTab).join('');
+        
+        const allTabLinks = document.querySelectorAll('.tab-link');
+
+        allTabLinks.forEach(link => {
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            state.activeTab = link.dataset.tab;
+            updateActiveTab();
+          });
+        });
+        
+        updateActiveTab();
+      };
+      
+      const updateActiveTab = () => {
+        document.querySelectorAll('.tab-link').forEach(link => {
+          link.classList.toggle('active', link.dataset.tab === state.activeTab);
+        });
+        dom.contentAreas.forEach(area => {
+          area.classList.toggle('active', area.id.startsWith(state.activeTab));
+        });
+      };
+      
+      // --- CHARTS ---
+      let barChart, pieChart;
+      const initCharts = () => {
+        Chart.defaults.color = '#A9A9A9';
+        Chart.defaults.font.family = "'Inter', sans-serif";
+
+        const barCtx = document.getElementById('barChart').getContext('2d');
+        barChart = new Chart(barCtx, {
+            type: 'bar',
+            data: { labels: [], datasets: [] },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    title: { display: true, text: 'Tasks per Topic', color: '#F2F2F2', font: { size: 16, weight: 'bold' } }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#444' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        pieChart = new Chart(pieCtx, {
+            type: 'pie',
+            data: { labels: [], datasets: [] },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'Task Status', color: '#F2F2F2', font: { size: 16, weight: 'bold' } }
+                }
+            }
+        });
+      };
+      
+      const updateCharts = () => {
+        // Bar Chart Data
+        const tasksByTopic = state.tasks.reduce((acc, task) => {
+            acc[task.topic] = (acc[task.topic] || 0) + 1;
+            return acc;
+        }, {});
+        barChart.data.labels = Object.keys(tasksByTopic);
+        barChart.data.datasets = [{
+            label: 'Tasks',
+            data: Object.values(tasksByTopic),
+            backgroundColor: '#4A90E2',
+            borderRadius: 4
+        }];
+        barChart.update();
+
+        // Pie Chart Data
+        const completedCount = state.tasks.filter(t => t.completed).length;
+        const incompleteCount = state.tasks.length - completedCount;
+        pieChart.data.labels = ['Completed', 'Incomplete'];
+        pieChart.data.datasets = [{
+            data: [completedCount, incompleteCount],
+            backgroundColor: ['#50E3C2', '#E94C53'],
+            borderColor: '#2C2C31',
+            borderWidth: 2
+        }];
+        pieChart.update();
+      };
+      
+      // --- INITIALIZATION ---
+      const init = () => {
+        createManifest();
+        registerServiceWorker();
+
+        loadData();
+        setupTabs();
+        initCharts();
+        renderAll();
+        
+        // Setup event listeners
+        dom.todo.add.addEventListener('click', () => handleAddItem('todo'));
+        dom.task.add.addEventListener('click', () => handleAddItem('task'));
+        dom.goal.add.addEventListener('click', () => handleAddItem('goal'));
+        dom.queue.add.addEventListener('click', () => handleAddItem('queue'));
+        dom.note.add.addEventListener('click', () => handleAddItem('note'));
+        dom.diary.add.addEventListener('click', () => handleAddItem('diary'));
+        
+        document.querySelector('.app-main').addEventListener('click', handleListClick);
+
+        Notification.requestPermission();
+      };
+
+      init();
+    });
+  </script>
+</body>
+</html>
